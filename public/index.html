@@ -1,0 +1,2221 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbot</title>
+  <style>
+    :root {
+      --bg-color: #f5f7fa;
+      --container-bg: white;
+      --header-bg: #007bff;
+      --header-text: white;
+      --user-bg: #007bff;
+      --user-text: white;
+      --bot-bg: #e9ecef;
+      --bot-text: #333;
+      --command-bg: #f8f9fa;
+      --command-border: #007bff;
+      --input-bg: white;
+      --input-text: #333;
+      --border-color: #ddd;
+      
+      /* Emotion-based color variables */
+      --emotion-happy: linear-gradient(135deg, #FFD700, #FFA500);
+      --emotion-sad: linear-gradient(135deg, #6495ED, #4169E1);
+      --emotion-angry: linear-gradient(135deg, #FF6347, #DC143C);
+      --emotion-excited: linear-gradient(135deg, #FF1493, #FF69B4);
+      --emotion-calm: linear-gradient(135deg, #98FB98, #90EE90);
+      --emotion-confused: linear-gradient(135deg, #DDA0DD, #9370DB);
+      --emotion-neutral: linear-gradient(135deg, #007bff, #0056b3);
+      
+      /* Animation variables */
+      --pulse-speed: 2s;
+      --glow-intensity: 0;
+    }
+    
+    [data-theme="dark"] {
+      --bg-color: #1a1a1a;
+      --container-bg: #2d2d2d;
+      --header-bg: #0056b3;
+      --header-text: white;
+      --user-bg: #0056b3;
+      --user-text: white;
+      --bot-bg: #3a3a3a;
+      --bot-text: #e0e0e0;
+      --command-bg: #404040;
+      --command-border: #0056b3;
+      --input-bg: #3a3a3a;
+      --input-text: #e0e0e0;
+      --border-color: #555;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--container-bg);
+      display: flex;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      transition: background 0.3s ease;
+      overflow-x: hidden;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    
+    /* Conversation Sidebar Styles */
+    .conversation-sidebar {
+      width: 300px;
+      background: var(--container-bg);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      transition: transform 0.3s ease;
+      z-index: 100;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      position: fixed;
+      left: 0;
+      top: 0;
+    }
+    
+    .conversation-sidebar.hidden {
+      transform: translateX(-100%);
+    }
+    
+    .sidebar-header {
+      padding: 15px;
+      background: var(--header-bg);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .sidebar-header h4 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .sidebar-toggle {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s ease;
+      font-weight: bold;
+    }
+    
+    .sidebar-toggle:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.05);
+    }
+    
+    .conversation-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+    
+    .mood-neutral {
+      --header-bg: var(--emotion-neutral);
+      --user-bg: var(--emotion-neutral);
+      --glow-intensity: 0;
+    }
+    
+    .chat-container.emotional {
+      animation: emotionalGlow 2s infinite;
+    }
+    
+    /* Conversation item delete button */
+    .delete-conversation-btn {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.2s ease;
+      padding: 5px;
+      border-radius: 4px;
+    }
+    
+    .delete-conversation-btn:hover {
+      opacity: 1;
+      background: rgba(0, 0, 0, 0.1);
+    }
+    
+    .conversation-item {
+      position: relative;
+      padding: 12px 30px 12px 12px; /* Increased right padding for delete button */
+      margin-bottom: 8px;
+      background: var(--bot-bg);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+    }
+    
+    .conversation-item:hover {
+      background: var(--user-bg);
+      color: white;
+      border-left-color: var(--header-bg);
+      transform: translateX(5px);
+    }
+    
+    .conversation-item.active {
+      background: var(--header-bg);
+      color: white;
+      border-left-color: var(--user-bg);
+    }
+    
+    .conversation-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .conversation-date {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+    
+    .conversation-preview {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .no-conversations {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--bot-text);
+      opacity: 0.6;
+    }
+    
+    .no-conversations p {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+    }
+    
+    .no-conversations small {
+      font-size: 12px;
+    }
+    
+    .sidebar-footer {
+      padding: 15px;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .new-conversation-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--header-bg);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    
+    .new-conversation-btn:hover {
+      background: var(--user-bg);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    }
+    
+    .sidebar-toggle-arrow {
+      position: fixed;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 60px;
+      background: var(--header-bg);
+      color: white;
+      border: none;
+      border-radius: 0 15px 15px 0;
+      cursor: pointer;
+      font-size: 18px;
+      z-index: 150;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding-left: 5px;
+    }
+    
+    .sidebar-toggle-arrow:hover {
+      background: var(--user-bg);
+      width: 35px;
+      box-shadow: 3px 0 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .sidebar-toggle-arrow.show {
+      display: flex;
+    }
+
+    
+    .main-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      transition: margin-left 0.3s ease;
+      position: relative;
+      min-height: 100vh;
+      background: var(--container-bg);
+      margin-left: 0;
+      width: 100%;
+    }
+    
+    .main-container.with-sidebar {
+      margin-left: 300px;
+    }
+    
+    .main-container.sidebar-hidden {
+      margin-left: 0;
+    }
+    .chat-container {
+      width: 100%;
+      height: 100vh;
+      background: var(--container-bg);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+    }
+    .chat-header {
+      padding: 15px;
+      background: var(--header-bg);
+      color: var(--header-text);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-header h3 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--header-text);
+      font-weight: 600;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    .profile-info {
+      font-size: 12px;
+      opacity: 0.9;
+      margin-top: 2px;
+      color: var(--header-text);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    
+    /* Ensure header text is always visible */
+    [data-theme="light"] .chat-header h3,
+    [data-theme="light"] .profile-info {
+      color: white;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+      font-weight: 600;
+    }
+    .clear-btn, .help-btn, .theme-btn, .auth-btn {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-left: 5px;
+      transition: all 0.2s ease;
+      pointer-events: auto;
+      z-index: 10;
+      /* Ensure visibility in all themes */
+      backdrop-filter: blur(5px);
+      font-weight: 500;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    .clear-btn:hover, .help-btn:hover, .theme-btn:hover, .auth-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    /* Ensure buttons are always visible */
+    [data-theme="light"] .clear-btn,
+    [data-theme="light"] .help-btn,
+    [data-theme="light"] .theme-btn,
+    [data-theme="light"] .auth-btn {
+      background: rgba(0,0,0,0.1);
+      border: 1px solid rgba(0,0,0,0.2);
+      color: white;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+    
+    [data-theme="light"] .clear-btn:hover,
+    [data-theme="light"] .help-btn:hover,
+    [data-theme="light"] .theme-btn:hover,
+    [data-theme="light"] .auth-btn:hover {
+      background: rgba(0,0,0,0.2);
+      border: 1px solid rgba(0,0,0,0.3);
+    }
+    
+    /* Authentication Modal Styles */
+    .auth-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+    
+    .auth-modal-content {
+      background: var(--container-bg);
+      border-radius: 15px;
+      width: 400px;
+      max-width: 90vw;
+      padding: 0;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      animation: modalSlideIn 0.3s ease;
+    }
+    
+    @keyframes modalSlideIn {
+      from { opacity: 0; transform: translateY(-30px) scale(0.9); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    
+    .auth-header {
+      background: var(--header-bg);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 15px 15px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .auth-header h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+    }
+    
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .auth-tabs {
+      display: flex;
+      background: var(--command-bg);
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .auth-tab {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      background: transparent;
+      color: var(--bot-text);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+    
+    .auth-tab.active {
+      background: var(--container-bg);
+      color: var(--header-bg);
+      border-bottom: 2px solid var(--header-bg);
+    }
+    
+    .auth-tab:hover {
+      background: rgba(0, 123, 255, 0.1);
+    }
+    
+    .auth-form {
+      padding: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--bot-text);
+      font-weight: 500;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--input-bg);
+      color: var(--input-text);
+      font-size: 14px;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--header-bg);
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+    }
+    
+    .auth-submit-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--header-bg);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 10px;
+    }
+    
+    .auth-submit-btn:hover {
+      background: var(--user-bg);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    }
+    
+    .auth-message {
+      padding: 15px 20px;
+      text-align: center;
+      border-radius: 0 0 15px 15px;
+      min-height: 20px;
+    }
+    
+    .auth-message.success {
+      background: #d4edda;
+      color: #155724;
+      border-top: 1px solid #c3e6cb;
+    }
+    
+    .auth-message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border-top: 1px solid #f5c6cb;
+    }
+    .chat-box {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: var(--container-bg);
+    }
+    .message {
+      margin: 8px 0;
+      padding: 12px 16px;
+      border-radius: 18px;
+      max-width: 80%;
+      word-wrap: break-word;
+      animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .user {
+      background: var(--user-bg);
+      color: var(--user-text);
+      align-self: flex-end;
+      margin-left: 20%;
+    }
+    .bot {
+      background: var(--bot-bg);
+      color: var(--bot-text);
+      align-self: flex-start;
+      margin-right: 20%;
+    }
+    .command-response {
+      background: var(--command-bg);
+      color: var(--bot-text);
+      border-left: 4px solid var(--command-border);
+      align-self: flex-start;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      white-space: pre-line;
+      margin-right: 20%;
+    }
+    .input-box {
+      display: flex;
+      border-top: 1px solid var(--border-color);
+      background: var(--container-bg);
+      border-radius: 0 0 15px 15px;
+    }
+
+    .file-btn {
+      padding: 15px 12px;
+      border: none;
+      background: var(--header-bg);
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      font-size: 16px;
+      pointer-events: auto;
+      z-index: 10;
+      font-weight: 500;
+    }
+
+    .file-btn:hover {
+      background: var(--header-bg);
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .input-box input {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      outline: none;
+      background: var(--input-bg);
+      color: var(--input-text);
+      font-size: 14px;
+    }
+
+    .input-box input::placeholder {
+      color: #999;
+    }
+
+    .input-box button:last-child {
+      padding: 15px 20px;
+      border: none;
+      background: var(--header-bg);
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      font-weight: 500;
+    }
+
+    .input-box button:last-child:hover {
+      background: var(--header-bg);
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    
+    [data-theme="light"] .input-box button:last-child {
+      background: var(--header-bg);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    /* Improved placeholder and text for light theme */
+    [data-theme="light"] .input-box input::placeholder {
+      color: #666;
+    }
+    
+    [data-theme="light"] .input-box input {
+      color: var(--input-text);
+      background: var(--input-bg);
+    }
+    .file-upload-area {
+      background: var(--container-bg);
+      border: 2px dashed var(--header-bg);
+      border-radius: 10px;
+      padding: 20px;
+      margin: 10px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .file-upload-area:hover {
+      border-color: var(--user-bg);
+      background: rgba(0, 123, 255, 0.05);
+    }
+    .file-upload-area.drag-over {
+      border-color: var(--user-bg);
+      background: rgba(0, 123, 255, 0.1);
+      transform: scale(1.02);
+    }
+    .upload-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+    .upload-icon {
+      font-size: 48px;
+      color: var(--header-bg);
+    }
+    .upload-text {
+      font-size: 16px;
+      color: var(--bot-text);
+      margin: 0;
+    }
+    .upload-hint {
+      font-size: 12px;
+      color: var(--bot-text);
+      opacity: 0.7;
+      margin: 0;
+    }
+    .cancel-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.2s ease;
+    }
+    .cancel-btn:hover {
+      background: #c82333;
+    }
+    .typing-indicator {
+      background: var(--bot-bg);
+      color: var(--bot-text);
+      padding: 12px 16px;
+      border-radius: 18px;
+      margin: 8px 0;
+      max-width: 80%;
+      align-self: flex-start;
+      animation: pulse 1.5s infinite;
+      margin-right: 20%;
+    }
+    @keyframes pulse {
+      0%, 50%, 100% { opacity: 1; }
+      25%, 75% { opacity: 0.5; }
+    }
+    
+
+    
+    @keyframes emotionalGlow {
+      0%, 100% { box-shadow: 0 0 10px rgba(255, 255, 255, var(--glow-intensity)); }
+      50% { box-shadow: 0 0 20px rgba(255, 255, 255, calc(var(--glow-intensity) * 1.5)); }
+    }
+    
+    /* Emotion-specific mood styles */
+    .mood-happy {
+      --header-bg: var(--emotion-happy);
+      --user-bg: var(--emotion-happy);
+      --glow-intensity: 0.3;
+    }
+    
+    .mood-sad {
+      --header-bg: var(--emotion-sad);
+      --user-bg: var(--emotion-sad);
+      --glow-intensity: 0.2;
+    }
+    
+    .mood-angry {
+      --header-bg: var(--emotion-angry);
+      --user-bg: var(--emotion-angry);
+      --glow-intensity: 0.5;
+      --pulse-speed: 1s;
+    }
+    
+    .mood-excited {
+      --header-bg: var(--emotion-excited);
+      --user-bg: var(--emotion-excited);
+      --glow-intensity: 0.4;
+      --pulse-speed: 1.5s;
+    }
+    
+    .mood-calm {
+      --header-bg: var(--emotion-calm);
+      --user-bg: var(--emotion-calm);
+      --glow-intensity: 0.1;
+      --pulse-speed: 3s;
+    }
+    
+    .mood-confused {
+      --header-bg: var(--emotion-confused);
+      --user-bg: var(--emotion-confused);
+      --glow-intensity: 0.25;
+    }
+    
+    .mood-neutral {
+      --header-bg: var(--emotion-neutral);
+      --user-bg: var(--emotion-neutral);
+      --glow-intensity: 0;
+    }
+    
+    .chat-container.emotional {
+      animation: emotionalGlow 2s infinite;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .main-container {
+        padding: 0;
+        margin-left: 0 !important;
+        width: 100% !important;
+      }
+      
+      .chat-container {
+        height: 100vh;
+        border-radius: 0;
+        width: 100%;
+      }
+      
+      .conversation-sidebar {
+        width: 100%;
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 1000;
+        transform: translateX(-100%);
+      }
+      
+      .conversation-sidebar.show {
+        transform: translateX(0);
+      }
+      
+      .conversation-sidebar.hidden {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar-toggle-arrow {
+        display: flex !important;
+      }
+      
+      .chat-header {
+        padding: 12px;
+      }
+      
+      .chat-header h3 {
+        font-size: 16px;
+      }
+      
+      .clear-btn, .help-btn, .theme-btn, .auth-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+        margin-left: 3px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .main-container {
+        padding: 0;
+      }
+      
+      .chat-container {
+        height: 100vh;
+        border-radius: 0;
+      }
+      
+      .chat-header {
+        padding: 10px;
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .clear-btn, .help-btn, .theme-btn, .auth-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+        margin: 2px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Conversation History Sidebar -->
+  <div class="conversation-sidebar hidden" id="conversation-sidebar">
+    <div class="sidebar-header">
+      <h4>📚 Konuşma Geçmişi</h4>
+      <button onclick="toggleSidebar()" class="sidebar-toggle">←</button>
+    </div>
+    <div class="conversation-list" id="conversation-list">
+      <div class="no-conversations">
+        <p>📝 Henüz kayıtlı konuşma yok</p>
+        <small>İlk mesajınızı gönderin!</small>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <button onclick="startNewConversation()" class="new-conversation-btn">
+        ✨ Yeni Konuşma
+      </button>
+    </div>
+  </div>
+  
+  <div class="main-container" id="main-container">
+    <!-- Sidebar Toggle Arrow -->
+    <button class="sidebar-toggle-arrow" id="sidebar-toggle-arrow" onclick="toggleSidebar()">
+      ▶
+    </button>
+  <div class="chat-container">
+    <div class="chat-header">
+      <div>
+        <h3>🤖 AI Sohbet Botu</h3>
+        <div class="profile-info" id="profile-info">👤 Misafir</div>
+      </div>
+
+      <div>
+        <button onclick="showAuthModal()" class="auth-btn" id="auth-btn">🔐 Giriş</button>
+        <button onclick="toggleTheme()" class="theme-btn" id="theme-btn">🌙</button>
+        <button onclick="sendCommand('/help')" class="help-btn">Yardım</button>
+        <button onclick="clearHistory()" class="clear-btn">Temizle</button>
+      </div>
+    </div>
+    <div class="chat-box" id="chat-box"></div>
+    <div class="file-upload-area" id="file-upload-area" style="display: none;">
+      <div class="upload-content">
+        <div class="upload-icon">📁</div>
+        <p class="upload-text">📎 Dosyanızı buraya sürükleyin veya seçmek için tıklayın</p>
+        <p class="upload-hint">Desteklenen formatlar: JPG, PNG, GIF, PDF (Maks. 10MB)</p>
+        <input type="file" id="file-input" accept="image/*,.pdf" style="display: none;">
+        <button onclick="cancelUpload()" class="cancel-btn">İptal</button>
+      </div>
+    </div>
+    <div class="input-box">
+      <button onclick="toggleFileUpload()" class="file-btn" title="Upload file">📎</button>
+      <input type="text" id="message" placeholder="Mesaj yazın... (Komutlar için / kullanın)" onkeypress="handleKeyPress(event)">
+      <button onclick="sendMessage()">Gönder</button>
+    </div>
+  </div>
+
+  <!-- Authentication Modal -->
+  <div class="auth-modal" id="auth-modal" style="display: none;">
+    <div class="auth-modal-content">
+      <div class="auth-header">
+        <h3 id="auth-title">🔐 Kullanıcı Girişi</h3>
+        <button onclick="closeAuthModal()" class="close-btn">&times;</button>
+      </div>
+      
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login')" id="login-tab">Giriş</button>
+        <button class="auth-tab" onclick="switchAuthTab('register')" id="register-tab">Kayıt</button>
+      </div>
+      
+      <form id="auth-form">
+        <div class="auth-form">
+          <div class="form-group" id="name-group" style="display: none;">
+            <label for="name">Ad Soyad:</label>
+            <input type="text" id="name" placeholder="Adınızı ve soyadınızı girin">
+          </div>
+          
+          <div class="form-group">
+            <label for="username">Kullanıcı Adı:</label>
+            <input type="text" id="username" placeholder="Kullanıcı adınızı girin" required>
+          </div>
+          
+          <div class="form-group" id="email-group" style="display: none;">
+            <label for="email">E-posta (isteğe bağlı):</label>
+            <input type="email" id="email" placeholder="E-posta adresinizi girin">
+          </div>
+          
+          <div class="form-group">
+            <label for="password">Şifre:</label>
+            <input type="password" id="password" placeholder="Şifrenizi girin" required>
+          </div>
+          
+          <button type="submit" class="auth-submit-btn" id="auth-submit">🔐 Giriş Yap</button>
+        </div>
+      </form>
+      
+      <div class="auth-message" id="auth-message"></div>
+    </div>
+  </div>
+  
+  </div> <!-- Close main-container -->
+
+  <script>
+    // Immediately define all global functions for onclick handlers
+    
+    window.toggleTheme = function() {
+      console.log('Theme toggle clicked');
+      const isDarkTheme = localStorage.getItem('theme') === 'dark';
+      const newTheme = !isDarkTheme;
+      const theme = newTheme ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+      document.getElementById('theme-btn').textContent = newTheme ? '☀️' : '🌙';
+      localStorage.setItem('theme', theme);
+    };
+    
+    window.clearHistory = function() {
+      console.log('Clear history button clicked');
+      if (confirm('Sohbet geçmişini silmek istediğinizden emin misiniz?')) {
+        const sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+        fetch("/clear", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionId: sessionId })
+        });
+        document.getElementById("chat-box").innerHTML = "";
+        const chatBox = document.getElementById("chat-box");
+        const confirmDiv = document.createElement("div");
+        confirmDiv.className = "message bot";
+        confirmDiv.innerText = "Sohbet geçmişi temizlendi. Yeni bir konuşma başlayabilirsiniz!";
+        chatBox.appendChild(confirmDiv);
+      }
+    };
+    
+    window.sendCommand = async function(command) {
+      document.getElementById("message").value = command;
+      await window.sendMessage();
+    };
+    
+    window.sendMessage = async function() {
+      const input = document.getElementById("message");
+      const chatBox = document.getElementById("chat-box");
+      const userMessage = input.value.trim();
+      if (!userMessage) return;
+
+      // Kullanıcı mesajını ekle
+      const userDiv = document.createElement("div");
+      userDiv.className = "message user";
+      userDiv.innerText = "🙋‍♂️ " + userMessage;
+      chatBox.appendChild(userDiv);
+      
+      // Input'u temizle
+      input.value = "";
+      
+      // Typing indicator göster
+      const typingDiv = document.createElement("div");
+      typingDiv.className = "typing-indicator";
+      typingDiv.id = "typing";
+      typingDiv.innerText = "🤖 Bot yazıyor...";
+      chatBox.appendChild(typingDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      try {
+        // Sunucuya gönder
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            message: userMessage,
+            sessionId: currentSessionId,
+            conversationId: currentConversationId
+          })
+        });
+        const data = await res.json();
+
+        // Typing indicator'ı kaldır
+        const typing = document.getElementById("typing");
+        if (typing) {
+          typing.remove();
+        }
+
+        // Bot cevabını ekle
+        const botDiv = document.createElement("div");
+        if (data.isCommand) {
+          botDiv.className = "message command-response";
+          botDiv.innerText = "⚙️ " + data.reply;
+        } else {
+          botDiv.className = "message bot";
+          botDiv.innerText = "🤖 " + data.reply;
+        }
+        chatBox.appendChild(botDiv);
+        
+        // Refresh conversations list for authenticated users
+        if (currentUser) {
+          loadConversations();
+        }
+      } catch (error) {
+        // Typing indicator'ı kaldır
+        const typing = document.getElementById("typing");
+        if (typing) {
+          typing.remove();
+        }
+        
+        const errorDiv = document.createElement("div");
+        errorDiv.className = "message bot";
+        errorDiv.innerText = "❌ Bir hata oluştu, lütfen tekrar deneyin.";
+        chatBox.appendChild(errorDiv);
+      }
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+    };
+    
+    window.handleKeyPress = function(event) {
+      if (event.key === 'Enter') {
+        window.sendMessage();
+      }
+    };
+    
+    window.toggleFileUpload = function() {
+      console.log('File upload button clicked');
+      const uploadArea = document.getElementById('file-upload-area');
+      uploadArea.style.display = uploadArea.style.display === 'none' ? 'block' : 'none';
+      
+      // Setup file upload functionality when showing
+      if (uploadArea.style.display === 'block') {
+        setupFileUpload();
+      }
+    };
+    
+    window.cancelUpload = function() {
+      console.log('Cancel upload clicked');
+      document.getElementById('file-upload-area').style.display = 'none';
+    };
+    
+    window.toggleVoiceRecording = function() {
+      console.log('Voice recording toggle clicked');
+      alert('Ses kaydı özelliği henüz aktif değil.');
+    };
+    
+    window.toggleSpeech = function() {
+      console.log('Speech toggle clicked');
+      const speechBtn = document.getElementById('speech-btn');
+
+    };
+    
+    // Authentication functions
+    let currentUser = null;
+    let currentSessionId = localStorage.getItem('sessionId') || 'session_' + Math.random().toString(36).substr(2, 9);
+    let currentConversationId = null;
+    let conversations = [];
+    
+    // Conversation management functions
+    window.toggleSidebar = function() {
+      const sidebar = document.getElementById('conversation-sidebar');
+      const mainContainer = document.getElementById('main-container');
+      const toggleArrow = document.getElementById('sidebar-toggle-arrow');
+      
+      // Sadece giriş yapmış kullanıcılar sidebar'ı kullanabilir
+      if (!currentUser) {
+        return;
+      }
+      
+      // Check if we're on mobile
+      const isMobile = window.innerWidth <= 768;
+      
+      if (isMobile) {
+        // Mobile behavior: overlay sidebar
+        if (sidebar.classList.contains('show')) {
+          sidebar.classList.remove('show');
+          toggleArrow.style.display = 'flex';
+          toggleArrow.innerHTML = '▶';
+        } else {
+          sidebar.classList.add('show');
+          toggleArrow.style.display = 'none';
+        }
+      } else {
+        // Desktop behavior: toggle sidebar visibility
+        if (sidebar.classList.contains('hidden')) {
+          sidebar.classList.remove('hidden');
+          mainContainer.classList.add('with-sidebar');
+          mainContainer.classList.remove('sidebar-hidden');
+          toggleArrow.style.display = 'none';
+        } else {
+          sidebar.classList.add('hidden');
+          mainContainer.classList.remove('with-sidebar');
+          mainContainer.classList.add('sidebar-hidden');
+          toggleArrow.style.display = 'flex';
+          toggleArrow.innerHTML = '▶';
+        }
+      }
+    };
+    
+    window.startNewConversation = async function() {
+      if (!currentUser) return;
+      
+      try {
+        const response = await fetch('/conversation/new', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: currentSessionId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          currentConversationId = data.conversationId;
+          document.getElementById('chat-box').innerHTML = '';
+          loadConversations();
+          
+          // Welcome message for new conversation
+          const chatBox = document.getElementById('chat-box');
+          const welcomeDiv = document.createElement('div');
+          welcomeDiv.className = 'message bot';
+          welcomeDiv.innerText = '✨ Yeni konuşma başlatıldı! Sorularınızı sormaya başlayabilirsiniz.';
+          chatBox.appendChild(welcomeDiv);
+        }
+        
+      } catch (error) {
+        console.error('New conversation error:', error);
+      }
+    };
+    
+    async function loadConversations() {
+      if (!currentUser) return;
+      
+      try {
+        const response = await fetch(`/conversations/${currentSessionId}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          conversations = data.conversations;
+          displayConversations();
+        }
+        
+      } catch (error) {
+        console.error('Load conversations error:', error);
+      }
+    }
+    
+    function displayConversations() {
+      const conversationList = document.getElementById('conversation-list');
+      
+      if (conversations.length === 0) {
+        conversationList.innerHTML = `
+          <div class="no-conversations">
+            <p>📝 Henüz kayıtlı konuşma yok</p>
+            <small>İlk mesajınızı gönderin!</small>
+          </div>
+        `;
+        return;
+      }
+      
+      conversationList.innerHTML = conversations.map(conv => `
+        <div class="conversation-item ${conv.id === currentConversationId ? 'active' : ''}" 
+             onclick="loadConversation('${conv.id}')">
+          <div class="conversation-title">${conv.title}</div>
+          <div class="conversation-date">${formatDate(conv.lastMessageAt)}</div>
+          <div class="conversation-preview">${conv.preview}</div>
+          <button class="delete-conversation-btn" onclick="event.stopPropagation(); deleteConversation('${conv.id}');">🗑️</button>
+        </div>
+      `).join('');
+    }
+    
+    window.loadConversation = async function(conversationId) {
+      if (!currentUser) return;
+      
+      try {
+        const response = await fetch(`/conversation/${currentSessionId}/${conversationId}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          currentConversationId = conversationId;
+          
+          // Clear current chat
+          const chatBox = document.getElementById('chat-box');
+          chatBox.innerHTML = '';
+          
+          // Load conversation messages
+          data.conversation.messages.forEach(msg => {
+            const div = document.createElement('div');
+            div.className = `message ${msg.role === 'user' ? 'user' : 'bot'}`;
+            const icon = msg.role === 'user' ? '🙋‍♂️ ' : '🤖 ';
+            div.innerText = icon + msg.content;
+            chatBox.appendChild(div);
+          });
+          
+          chatBox.scrollTop = chatBox.scrollHeight;
+          displayConversations(); // Refresh to show active conversation
+        }
+        
+      } catch (error) {
+        console.error('Load conversation error:', error);
+      }
+    };
+    
+    // Delete conversation function
+    window.deleteConversation = async function(conversationId) {
+      if (!currentUser) return;
+      
+      // Confirm deletion
+      if (!confirm('Bu sohbeti silmek istediğinizden emin misiniz?')) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/conversation/${currentSessionId}/${conversationId}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+          // If deleted conversation was the current one, clear chat
+          if (conversationId === currentConversationId) {
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML = '';
+            currentConversationId = null;
+          }
+          
+          // Reload conversations
+          await loadConversations();
+          
+          // Show confirmation as an alert instead of in chat
+          alert('✅ Sohbet başarıyla silindi.');
+        } else {
+          throw new Error('Failed to delete conversation');
+        }
+        
+      } catch (error) {
+        console.error('Delete conversation error:', error);
+        // Show error as an alert instead of in chat
+        alert('❌ Sohbet silinirken bir hata oluştu. Lütfen tekrar deneyin.');
+      }
+    };
+    
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffTime = Math.abs(now - date);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 1) {
+        return 'Bugün';
+      } else if (diffDays === 2) {
+        return 'Dün';
+      } else if (diffDays <= 7) {
+        return `${diffDays - 1} gün önce`;
+      } else {
+        return date.toLocaleDateString('tr-TR');
+      }
+    }
+    
+    window.showAuthModal = function() {
+      document.getElementById('auth-modal').style.display = 'flex';
+    };
+    
+    window.closeAuthModal = function() {
+      document.getElementById('auth-modal').style.display = 'none';
+      clearAuthForm();
+    };
+    
+    window.switchAuthTab = function(tab) {
+      const loginTab = document.getElementById('login-tab');
+      const registerTab = document.getElementById('register-tab');
+      const authTitle = document.getElementById('auth-title');
+      const authSubmit = document.getElementById('auth-submit');
+      const nameGroup = document.getElementById('name-group');
+      const emailGroup = document.getElementById('email-group');
+      
+      if (tab === 'login') {
+        loginTab.classList.add('active');
+        registerTab.classList.remove('active');
+        authTitle.textContent = '🔐 Kullanıcı Girişi';
+        authSubmit.textContent = '🔐 Giriş Yap';
+        nameGroup.style.display = 'none';
+        emailGroup.style.display = 'none';
+      } else {
+        loginTab.classList.remove('active');
+        registerTab.classList.add('active');
+        authTitle.textContent = '📝 Hesap Oluştur';
+        authSubmit.textContent = '📝 Kayıt Ol';
+        nameGroup.style.display = 'block';
+        emailGroup.style.display = 'block';
+      }
+      
+      clearAuthForm();
+    };
+    
+    function clearAuthForm() {
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+      document.getElementById('name').value = '';
+      document.getElementById('email').value = '';
+      showAuthMessage('', '');
+    }
+    
+    function showAuthMessage(message, type) {
+      const authMessage = document.getElementById('auth-message');
+      authMessage.textContent = message;
+      authMessage.className = 'auth-message' + (type ? ' ' + type : '');
+    }
+    
+    // Handle authentication form submission
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('auth-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const isLogin = document.getElementById('login-tab').classList.contains('active');
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        
+        if (!username || !password) {
+          showAuthMessage('Lütfen tüm gerekli alanları doldurun', 'error');
+          return;
+        }
+        
+        try {
+          const endpoint = isLogin ? '/login' : '/register';
+          const body = { username, password };
+          
+          if (!isLogin) {
+            body.name = name || username;
+            body.email = email;
+          }
+          
+          console.log('Sending request to:', endpoint, body); // Debug log
+          
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+          
+          console.log('Response status:', response.status); // Debug log
+          
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          
+          const data = await response.json();
+          console.log('Response data:', data); // Debug log
+          
+          if (data.success) {
+            currentUser = data.user;
+            currentSessionId = data.sessionId;
+            localStorage.setItem('sessionId', currentSessionId);
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            updateUserDisplay();
+            closeAuthModal();
+            
+            showAuthMessage(data.message, 'success');
+            
+            // Welcome message
+            const chatBox = document.getElementById('chat-box');
+            const welcomeDiv = document.createElement('div');
+            welcomeDiv.className = 'message bot';
+            welcomeDiv.innerText = `🎉 Hoş geldin ${currentUser.name}! Artık seni tanıyorum ve konuşmalarımızı ilgi alanların ve tercihlerine göre kişiselleştireceğim.`;
+            chatBox.appendChild(welcomeDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            
+          } else {
+            showAuthMessage(data.error || 'Kimlik doğrulama başarısız', 'error');
+          }
+          
+        } catch (error) {
+          console.error('Auth error:', error);
+          let errorMessage = 'Bağlantı hatası. Lütfen tekrar deneyin.';
+          
+          if (error.message.includes('HTTP')) {
+            errorMessage = `Sunucu hatası: ${error.message}`;
+          } else if (error.message.includes('Failed to fetch')) {
+            errorMessage = 'Sunucuya bağlanılamıyor. Lütfen sunucunun http://localhost:3000 adresinde çalışıp çalışmadığını kontrol edin';
+          }
+          
+          showAuthMessage(errorMessage, 'error');
+        }
+      });
+    });
+    
+    function updateUserDisplay() {
+      const profileInfo = document.getElementById('profile-info');
+      const authBtn = document.getElementById('auth-btn');
+      const sidebar = document.getElementById('conversation-sidebar');
+      const toggleArrow = document.getElementById('sidebar-toggle-arrow');
+      const mainContainer = document.getElementById('main-container');
+      const isMobile = window.innerWidth <= 768;
+      
+      if (currentUser) {
+        // Kullanıcı giriş yaptı - Sidebar'ı göster ve konuşma geçmişini yükle
+        profileInfo.textContent = `👤 ${currentUser.name}`;
+        authBtn.textContent = '🚪 Çıkış';
+        authBtn.onclick = logout;
+        
+        if (isMobile) {
+          // Mobilde overlay sidebar
+          toggleArrow.classList.add('show');
+          toggleArrow.style.display = 'flex';
+          toggleArrow.innerHTML = '▶';
+          mainContainer.classList.remove('with-sidebar');
+        } else {
+          // Desktop'ta sabit sidebar
+          sidebar.classList.remove('hidden');
+          mainContainer.classList.add('with-sidebar');
+          mainContainer.classList.remove('sidebar-hidden');
+          toggleArrow.style.display = 'none';
+        }
+        
+        // Konuşma geçmişini yükle
+        loadConversations();
+        
+        // Hoş geldin mesajı göster
+        const chatBox = document.getElementById('chat-box');
+        if (chatBox.children.length === 0) {
+          const welcomeDiv = document.createElement('div');
+          welcomeDiv.className = 'message bot';
+          welcomeDiv.innerText = `🎉 Hoş geldin ${currentUser.name}! Konuşma geçmişin sol tarafta görünüyor. Yeni bir sohbete başlayabilirsin!`;
+          chatBox.appendChild(welcomeDiv);
+        }
+        
+      } else {
+        // Kullanıcı giriş yapmamış - Tam ekran modu
+        profileInfo.textContent = '👤 Misafir';
+        authBtn.textContent = '🔐 Giriş';
+        authBtn.onclick = showAuthModal;
+        
+        // Sidebar'ı tamamen gizle ve tam ekran yap
+        sidebar.classList.add('hidden');
+        mainContainer.classList.remove('with-sidebar');
+        mainContainer.classList.add('sidebar-hidden');
+        toggleArrow.style.display = 'none';
+        toggleArrow.classList.remove('show');
+        
+        // Mobilde de gizle
+        if (isMobile) {
+          sidebar.classList.remove('show');
+        }
+      }
+    }
+    
+    async function logout() {
+      try {
+        await fetch('/logout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: currentSessionId })
+        });
+        
+        currentUser = null;
+        currentSessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+        localStorage.removeItem('sessionId');
+        localStorage.removeItem('currentUser');
+        
+        // Kullanıcı durumunu güncelle - tam ekran moduna geç
+        updateUserDisplay();
+        
+        // Sohbet geçmişini temizle
+        document.getElementById('chat-box').innerHTML = '';
+        
+        // Çıkış mesajı
+        const chatBox = document.getElementById('chat-box');
+        const logoutDiv = document.createElement('div');
+        logoutDiv.className = 'message bot';
+        logoutDiv.innerText = '👋 Güle güle! Tekrar giriş yaptığınızda konuşma geçmişiniz burada olacak.';
+        chatBox.appendChild(logoutDiv);
+        
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    }
+    
+    // Check for existing session on page load
+    async function checkExistingSession() {
+      const savedUser = localStorage.getItem('currentUser');
+      const savedSessionId = localStorage.getItem('sessionId');
+      
+      if (savedUser && savedSessionId) {
+        try {
+          const response = await fetch(`/user/${savedSessionId}`);
+          if (response.ok) {
+            const data = await response.json();
+            currentUser = data.user;
+            currentSessionId = savedSessionId;
+            updateUserDisplay();
+          } else {
+            // Session expired, clear local storage
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('sessionId');
+          }
+        } catch (error) {
+          console.error('Session check error:', error);
+        }
+      }
+    }
+    
+    // Theme management
+    let isDarkTheme = localStorage.getItem('theme') === 'dark';
+    let currentLanguage = localStorage.getItem('language') || 'tr';
+    let isRecording = false;
+    let speechEnabled = localStorage.getItem('speechEnabled') === 'true';
+    let recognition;
+    let speechSynthesis = window.speechSynthesis;
+    
+    function toggleTheme() {
+      console.log('Theme toggle clicked');
+      isDarkTheme = !isDarkTheme;
+      const theme = isDarkTheme ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+      document.getElementById('theme-btn').textContent = isDarkTheme ? '☀️' : '🌙';
+      localStorage.setItem('theme', theme);
+    }
+    
+    function toggleLanguage() {
+      console.log('Language toggle clicked');
+      currentLanguage = currentLanguage === 'tr' ? 'en' : 'tr';
+      localStorage.setItem('language', currentLanguage);
+      updateLanguageDisplay();
+      
+      // Send language change command to backend
+      sendCommand(`/lang ${currentLanguage}`);
+    }
+    
+    // Make functions globally accessible
+    window.toggleTheme = toggleTheme;
+    window.toggleLanguage = toggleLanguage;
+    
+    function updateLanguageDisplay() {
+      const langBtn = document.getElementById('lang-btn');
+      langBtn.textContent = `🌐 ${currentLanguage.toUpperCase()}`;
+    }
+    
+    function initTheme() {
+      const theme = isDarkTheme ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+      document.getElementById('theme-btn').textContent = isDarkTheme ? '☀️' : '🌙';
+      updateLanguageDisplay();
+    }
+    
+    // Load chat history on page load
+    window.onload = async function() {
+      console.log('Page loaded, initializing...');
+      initTheme();
+      await checkExistingSession();
+      await loadUserProfile();
+      await loadChatHistory();
+      console.log('Initialization complete');
+      
+      // Handle window resize for responsive behavior
+      window.addEventListener('resize', function() {
+        const sidebar = document.getElementById('conversation-sidebar');
+        const toggleArrow = document.getElementById('sidebar-toggle-arrow');
+        const mainContainer = document.getElementById('main-container');
+        const isMobile = window.innerWidth <= 768;
+        
+        if (isMobile) {
+          // Mobil ekrana geçiş
+          mainContainer.classList.remove('with-sidebar');
+          sidebar.classList.remove('hidden');
+          sidebar.classList.remove('show');
+          if (currentUser) {
+            toggleArrow.classList.add('show');
+            toggleArrow.style.display = 'flex';
+            toggleArrow.innerHTML = '▶';
+          }
+        } else {
+          // Desktop ekrana geçiş
+          sidebar.classList.remove('show');
+          if (currentUser) {
+            sidebar.classList.remove('hidden');
+            mainContainer.classList.add('with-sidebar');
+            mainContainer.classList.remove('sidebar-hidden');
+            toggleArrow.style.display = 'none';
+            toggleArrow.classList.remove('show');
+          } else {
+            sidebar.classList.add('hidden');
+            mainContainer.classList.remove('with-sidebar');
+            mainContainer.classList.add('sidebar-hidden');
+            toggleArrow.style.display = 'none';
+            toggleArrow.classList.remove('show');
+          }
+        }
+      });
+    };
+    
+    async function loadUserProfile() {
+      try {
+        const res = await fetch(`/profile/${sessionId}`);
+        const data = await res.json();
+        updateProfileDisplay(data.profile);
+      } catch (error) {
+        console.log('No profile found');
+      }
+    }
+    
+    function updateProfileDisplay(profile) {
+      const profileInfo = document.getElementById('profile-info');
+      if (profile && profile.name) {
+        const personality = profile.personality || 'friend';
+        const personalityEmoji = {
+          friend: '😄',
+          teacher: '👩‍🏫', 
+          assistant: '💼'
+        };
+        profileInfo.textContent = `👤 ${profile.name} ${personalityEmoji[personality]}`;
+      } else {
+        profileInfo.textContent = '👤 Guest 😄';
+      }
+    }
+    
+    async function loadChatHistory() {
+      try {
+        const res = await fetch(`/history/${sessionId}`);
+        const data = await res.json();
+        const chatBox = document.getElementById("chat-box");
+        
+        // Display existing chat history
+        data.history.forEach(msg => {
+          const div = document.createElement("div");
+          div.className = `message ${msg.role === 'user' ? 'user' : 'bot'}`;
+          
+          // Add icons for better visual distinction
+          const icon = msg.role === 'user' ? '🙋‍♂️ ' : '🤖 ';
+          div.innerText = icon + msg.content;
+          
+          chatBox.appendChild(div);
+        });
+        
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } catch (error) {
+        console.log('No previous history found');
+      }
+    }
+    
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+    
+    // Quick command sender for buttons
+    async function sendCommand(command) {
+      document.getElementById("message").value = command;
+      await sendMessage();
+    }
+    
+    // Make sendCommand globally accessible
+    window.sendCommand = sendCommand;
+    
+    function showTypingIndicator() {
+      const chatBox = document.getElementById("chat-box");
+      const typingDiv = document.createElement("div");
+      typingDiv.className = "typing-indicator";
+      typingDiv.id = "typing";
+      typingDiv.innerText = "🤖 Bot yazıyor...";
+      chatBox.appendChild(typingDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    
+    function removeTypingIndicator() {
+      const typing = document.getElementById("typing");
+      if (typing) {
+        typing.remove();
+      }
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("message");
+      const chatBox = document.getElementById("chat-box");
+      const userMessage = input.value.trim();
+      if (!userMessage) return;
+
+      // Kullanıcı mesajını ekle
+      const userDiv = document.createElement("div");
+      userDiv.className = "message user";
+      userDiv.innerText = "🙋‍♂️ " + userMessage;
+      chatBox.appendChild(userDiv);
+      
+      // Input'u temizle
+      input.value = "";
+      
+      // Typing indicator göster
+      showTypingIndicator();
+
+      try {
+        // Sunucuya gönder
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            message: userMessage,
+            sessionId: sessionId 
+          })
+        });
+        const data = await res.json();
+
+        // Typing indicator'ı kaldır
+        removeTypingIndicator();
+
+
+        // Bot cevabını ekle
+        const botDiv = document.createElement("div");
+        if (data.isCommand) {
+          botDiv.className = "message command-response";
+          botDiv.innerText = "⚙️ " + data.reply;
+          
+          // If it's a setname command response, reload profile
+          if (userMessage.toLowerCase().startsWith('/setname ') || userMessage.toLowerCase().startsWith('/personality ')) {
+            await loadUserProfile();
+          }
+        } else {
+          botDiv.className = "message bot";
+          botDiv.innerText = "🤖 " + data.reply;
+          
+          // Speak the response if speech is enabled
+          if (speechEnabled) {
+            speakText(data.reply);
+          }
+        }
+        chatBox.appendChild(botDiv);
+      } catch (error) {
+        removeTypingIndicator();
+        const errorDiv = document.createElement("div");
+        errorDiv.className = "message bot";
+        errorDiv.innerText = "❌ Bir hata oluştu, lütfen tekrar deneyin.";
+        chatBox.appendChild(errorDiv);
+      }
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    
+    function clearHistory() {
+      console.log('Clear history button clicked');
+      if (confirm('Sohbet geçmişini silmek istediğinizden emin misiniz?')) {
+        try {
+          fetch("/clear", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId: sessionId })
+          });
+          
+          // Clear the chat box
+          document.getElementById("chat-box").innerHTML = "";
+          
+          // Show confirmation
+          const chatBox = document.getElementById("chat-box");
+          const confirmDiv = document.createElement("div");
+          confirmDiv.className = "message bot";
+          confirmDiv.innerText = "Sohbet geçmişi temizlendi. Yeni bir konuşma başlayabilirsiniz!";
+          chatBox.appendChild(confirmDiv);
+        } catch (error) {
+          alert('Geçmiş temizlenirken bir hata oluştu.');
+        }
+      }
+    }
+    
+    // Make clearHistory globally accessible
+    window.clearHistory = clearHistory;
+    
+    // File upload functions
+    function toggleFileUpload() {
+      console.log('File upload button clicked');
+      const uploadArea = document.getElementById('file-upload-area');
+      if (uploadArea.style.display === 'none') {
+        uploadArea.style.display = 'block';
+        setupFileUpload();
+      } else {
+        uploadArea.style.display = 'none';
+      }
+    }
+    
+    function cancelUpload() {
+      console.log('Cancel upload clicked');
+      document.getElementById('file-upload-area').style.display = 'none';
+    }
+    
+    // Make file upload functions globally accessible
+    window.toggleFileUpload = toggleFileUpload;
+    window.cancelUpload = cancelUpload;
+    
+    function setupFileUpload() {
+      const uploadArea = document.getElementById('file-upload-area');
+      const fileInput = document.getElementById('file-input');
+      
+      // Click to select file
+      uploadArea.onclick = () => fileInput.click();
+      
+      // Handle file selection
+      fileInput.onchange = function(event) {
+        const file = event.target.files[0];
+        if (file) {
+          uploadFile(file);
+        }
+      };
+      
+      // Handle drag and drop
+      uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.style.borderColor = 'var(--user-bg)';
+        uploadArea.style.backgroundColor = 'rgba(0, 123, 255, 0.1)';
+      });
+      
+      uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadArea.style.borderColor = 'var(--header-bg)';
+        uploadArea.style.backgroundColor = 'var(--container-bg)';
+      });
+      
+      uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.style.borderColor = 'var(--header-bg)';
+        uploadArea.style.backgroundColor = 'var(--container-bg)';
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          uploadFile(files[0]);
+        }
+      });
+    }
+    
+    async function uploadFile(file) {
+      // Hide upload area
+      document.getElementById('file-upload-area').style.display = 'none';
+      
+      // Check file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Dosya çok büyük! Maksimum 10MB boyutunda dosya yükleyebilirsiniz.');
+        return;
+      }
+      
+      // Check file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('Desteklenmeyen dosya türü! Sadece resim (JPEG, PNG, GIF) ve PDF dosyaları yükleyebilirsiniz.');
+        return;
+      }
+      
+      // Show user message
+      const chatBox = document.getElementById('chat-box');
+      const userDiv = document.createElement('div');
+      userDiv.className = 'message user';
+      userDiv.innerHTML = `🙋‍♂️ Dosya yüklendi: <strong>${file.name}</strong> (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+      chatBox.appendChild(userDiv);
+      
+      // Show typing indicator
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'typing-indicator';
+      typingDiv.id = 'file-typing';
+      typingDiv.innerText = '🤖 Dosya analiz ediliyor...';
+      chatBox.appendChild(typingDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      
+      try {
+        // Prepare form data
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('sessionId', currentSessionId); // Use the correct variable name
+        formData.append('message', `Bu ${file.type.includes('image') ? 'resmi' : 'dosyayı'} analiz et`);
+        
+        // Upload file
+        const response = await fetch('/upload', {
+          method: 'POST',
+          body: formData
+        });
+        
+        // Remove typing indicator
+        const typing = document.getElementById('file-typing');
+        if (typing) {
+          typing.remove();
+        }
+        
+        const data = await response.json();
+        
+        if (response.ok && data.reply) {
+          // Show bot response
+          const botDiv = document.createElement('div');
+          botDiv.className = 'message bot';
+          botDiv.innerHTML = `🤖 <strong>Dosya Analizi:</strong><br>${data.reply}`;
+          chatBox.appendChild(botDiv);
+        } else {
+          // Show error
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'message bot';
+          errorDiv.innerText = `❌ ${data.error || 'Dosya yükleme başarısız oldu'}`;
+          chatBox.appendChild(errorDiv);
+        }
+        
+      } catch (error) {
+        // Remove typing indicator
+        const typing = document.getElementById('file-typing');
+        if (typing) {
+          typing.remove();
+        }
+        
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'message bot';
+        errorDiv.innerText = '❌ Dosya yükleme sırasında bir hata oluştu. Lütfen tekrar deneyin.';
+        chatBox.appendChild(errorDiv);
+      }
+      
+      chatBox.scrollTop = chatBox.scrollHeight;
+      
+      // Clear file input
+      document.getElementById('file-input').value = '';
+    }
+    
+    // Voice functions
+    function startRecording() {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          const mediaRecorder = new MediaRecorder(stream);
+          const audioChunks = [];
+          
+          mediaRecorder.ondataavailable = event => {
+            audioChunks.push(event.data);
+          };
+          
+          mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+            audio.play();
+            
+            const formData = new FormData();
+            formData.append('audio', audioBlob);
+            formData.append('sessionId', currentSessionId);
+            formData.append('message', 'Please analyze this audio');
+            
+            fetch('/upload', {
+              method: 'POST',
+              body: formData
+            })
+              .then(response => response.json())
+              .then(data => {
+                if (response.ok) {
+                  const chatBox = document.getElementById('chat-box');
+                  const botDiv = document.createElement('div');
+                  botDiv.className = 'message bot';
+                  botDiv.innerText = "🤖 " + data.reply;
+                  chatBox.appendChild(botDiv);
+                  chatBox.scrollTop = chatBox.scrollHeight;
+                } else {
+                  alert('Audio analysis failed');
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                alert('Audio analysis failed');
+              });
+          };
+          
+          mediaRecorder.start();
+          
+          document.getElementById('start-recording').style.display = 'none';
+          document.getElementById('stop-recording').style.display = 'inline-block';
+          
+          document.getElementById('stop-recording').onclick = () => {
+            mediaRecorder.stop();
+            document.getElementById('start-recording').style.display = 'inline-block';
+            document.getElementById('stop-recording').style.display = 'none';
+          };
+        })
+        .catch(error => {
+          console.error('Error accessing microphone:', error);
+          alert('Microphone access denied');
+        });
+    }
+    
+    function showTypingIndicator() {
+      const chatBox = document.getElementById('chat-box');
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'typing-indicator';
+      typingDiv.id = 'typing-indicator';
+      typingDiv.innerText = '🤖 Yazıyor...';
+      chatBox.appendChild(typingDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    
+    function removeTypingIndicator() {
+      const typing = document.getElementById('typing-indicator');
+      if (typing) {
+        typing.remove();
+      }
+    }
+    
+    function sendMessage() {
+      const messageInput = document.getElementById('message-input');
+      const message = messageInput.value.trim();
+      if (message === '') {
+        return;
+      }
+      
+      const chatBox = document.getElementById('chat-box');
+      const userDiv = document.createElement('div');
+      userDiv.className = 'message user';
+      userDiv.innerText = message;
+      chatBox.appendChild(userDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      
+      showTypingIndicator();
+      messageInput.value = '';
+      
+      fetch('/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: message,
+          sessionId: currentSessionId
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          removeTypingIndicator();
+          if (response.ok) {
+            const botDiv = document.createElement('div');
+            botDiv.className = 'message bot';
+            botDiv.innerText = "🤖 " + data.reply;
+            chatBox.appendChild(botDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+          } else {
+            alert('Chat failed');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Chat failed');
+        });
+    }
+    
+    document.getElementById('send-button').onclick = sendMessage;
+    document.getElementById('message-input').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+    
+
+    
+    function setupFileUpload() {
+      const uploadArea = document.getElementById('file-upload-area');
+      const fileInput = document.getElementById('file-input');
+      
+      // Remove any existing event listeners to prevent duplication
+      const newUploadArea = uploadArea.cloneNode(true);
+      uploadArea.parentNode.replaceChild(newUploadArea, uploadArea);
+      const updatedUploadArea = document.getElementById('file-upload-area');
+      
+      const newFileInput = fileInput.cloneNode(true);
+      fileInput.parentNode.replaceChild(newFileInput, fileInput);
+      const updatedFileInput = document.getElementById('file-input');
+      
+      // Click to select file
+      updatedUploadArea.onclick = () => updatedFileInput.click();
+      
+      // Handle file selection
+      updatedFileInput.onchange = function(event) {
+        const file = event.target.files[0];
+        if (file) {
+          uploadFile(file);
+        }
+      };
+      
+      // Handle drag and drop
+      updatedUploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        updatedUploadArea.classList.add('drag-over');
+      });
+      
+      updatedUploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        updatedUploadArea.classList.remove('drag-over');
+      });
+      
+      updatedUploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        updatedUploadArea.classList.remove('drag-over');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          uploadFile(files[0]);
+        }
+      });
+    }
+    
+    async function uploadFile(file) {
+      const chatBox = document.getElementById("chat-box");
+      
+      // Hide upload area
+      document.getElementById('file-upload-area').style.display = 'none';
+      
+      // Show file being uploaded
+      const fileDiv = document.createElement("div");
+      fileDiv.className = "message user";
+      fileDiv.innerText = `📎 Uploaded: ${file.name}`;
+      chatBox.appendChild(fileDiv);
+      
+      // Show loading
+      showTypingIndicator();
+      
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('sessionId', currentSessionId);
+        formData.append('message', 'Please analyze this file');
+        
+        const response = await fetch('/upload', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        removeTypingIndicator();
+        
+        if (response.ok) {
+          // Show analysis result
+          const resultDiv = document.createElement("div");
+          resultDiv.className = "message bot";
+          resultDiv.innerText = "🤖 " + data.reply;
+          chatBox.appendChild(resultDiv);
+          
+          // Speak the response if speech is enabled
+          if (speechEnabled) {
+            speakText(data.reply);
+          }
+        } else {
+          // Show error
+          const errorDiv = document.createElement("div");
+          errorDiv.className = "message bot";
+          errorDiv.innerText = "❌ " + (data.error || 'File upload failed');
+          chatBox.appendChild(errorDiv);
+        }
+      } catch (error) {
+        removeTypingIndicator();
+        const errorDiv = document.createElement("div");
+        errorDiv.className = "message bot";
+        errorDiv.innerText = "❌ File upload failed. Please try again.";
+        chatBox.appendChild(errorDiv);
+      }
+      
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    
+    // Make functions globally accessible for onclick handlers
+    window.sendMessage = sendMessage;
+    window.handleKeyPress = handleKeyPress;
+    
+    // Make sure authentication functions are globally accessible
+    window.showAuthModal = showAuthModal;
+    window.closeAuthModal = closeAuthModal;
+    window.switchAuthTab = switchAuthTab;
+    window.toggleSidebar = toggleSidebar;
+    window.startNewConversation = startNewConversation;
+    window.loadConversation = loadConversation;
+  </script>
+</body>
+</html>

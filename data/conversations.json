@@ -1,0 +1,115 @@
+{
+  "userConversations": [
+    [
+      "user_1756736434937_yl5i8vs2g",
+      [
+        {
+          "id": "conv_1756899799720_t07u36tcb",
+          "title": "edasdadasdaıdjkalsmdasdıadjamdıadjadmsdopakdüsoadk...",
+          "messages": [
+            {
+              "role": "user",
+              "content": "edasdadasdaıdjkalsmdasdıadjamdıadjadmsdopakdüsoadkadsoakdaosdakdsareal time chat app how scheduled message real time chat app how scheduled message real time chat app how scheduled message real time chat app how scheduled message real time chat app how scheduled message real time chat app how scheduled message real time chat app how scheduled message real time chat app how scheduled message real time chat app how scheduled message real time chat app how scheduled message real time chat app how scheduled message real time chat app how scheduled message real time chat app how scheduled message real time chat app how scheduled message real time chat app how scheduled message real time chat app how scheduled message dsareal time chat app how scheduled message",
+              "timestamp": "2025-09-03T11:43:19.720Z"
+            },
+            {
+              "role": "user",
+              "content": "selam",
+              "timestamp": "2025-09-03T13:43:42.740Z"
+            },
+            {
+              "role": "assistant",
+              "content": "Selam Boran! 👋  Nasılsın bugün?  Umarım iyisindir!  Teknoloji dünyasında neler dönüyor?  Yeni bir uygulama keşfettin mi yoksa acayip bir teknoloji haberine mi denk geldin?  Anlat anlat, merakla bekliyorum! 😉  Belki de yeni bir gadget'ın mı var?  (Eğer varsa, resimlerini bekliyorum! 😉📸)  Ya da belki de bir sorunla mı uğraşıyorsun, yardım edebileceğim bir şey var mı?  Her neyse, sohbet etmek için buradayım! 😊\n",
+              "timestamp": "2025-09-03T13:43:44.431Z"
+            }
+          ],
+          "createdAt": "2025-09-03T11:43:19.720Z",
+          "lastMessageAt": "2025-09-03T13:43:44.431Z"
+        },
+        {
+          "id": "conv_1756900087032_sqxrx75rk",
+          "title": "Yeni Konuşma",
+          "messages": [
+            {
+              "role": "user",
+              "content": "dertleşelim",
+              "timestamp": "2025-09-03T11:48:16.728Z"
+            },
+            {
+              "role": "assistant",
+              "content": "Hey Boran!  😊  \"Dertleşelim\" demişsin, demek ki biraz kafan karışık veya yorgunsun.  Anlıyorum, bazen teknoloji dünyasında boğulmak çok kolay olabiliyor!  Özellikle de gerçek zamanlı sohbet uygulamalarındaki zamanlanmış mesaj özelliği gibi detaylara dalınca... 😉  Hatırlıyorum, az önce o konuda bayağı bir araştırma yapıyordun.  \n\nNeyse, derdini anlat bakalım.  Ne tür bir dert bu?  Teknolojiyle ilgili mi, yoksa başka bir şey mi?  Biliyorsun ki, ben her zaman seninleyim.  🎧  Sana kulak vereceğim ve elimden gelen her türlü desteği sağlayacağım.  Unutma,  teknolojiyi anlamak için bazen bir dostun omzuna yaslanmak da gerekiyor. 😊  Hadi, anlat bakalım.  ☕  Bir kahve al, rahatla ve derdini dök.  Senden dinlemeyi çok isterim. 💪\n",
+              "timestamp": "2025-09-03T11:48:18.742Z"
+            }
+          ],
+          "createdAt": "2025-09-03T11:48:07.032Z",
+          "lastMessageAt": "2025-09-03T11:48:18.742Z"
+        },
+        {
+          "id": "conv_1756900118662_vp9plqq7h",
+          "title": "selam",
+          "messages": [
+            {
+              "role": "user",
+              "content": "selam",
+              "timestamp": "2025-09-03T11:48:38.662Z"
+            }
+          ],
+          "createdAt": "2025-09-03T11:48:38.662Z",
+          "lastMessageAt": "2025-09-03T11:48:38.662Z"
+        },
+        {
+          "id": "conv_1756906721180_uloafch7r",
+          "title": "Yeni Konuşma",
+          "messages": [],
+          "createdAt": "2025-09-03T13:38:41.180Z",
+          "lastMessageAt": "2025-09-03T13:38:41.180Z"
+        },
+        {
+          "id": "conv_1756909026729_ttavwe74r",
+          "title": "boran",
+          "messages": [
+            {
+              "role": "user",
+              "content": "boran",
+              "timestamp": "2025-09-03T14:17:06.729Z"
+            }
+          ],
+          "createdAt": "2025-09-03T14:17:06.729Z",
+          "lastMessageAt": "2025-09-03T14:17:06.729Z"
+        },
+        {
+          "id": "conv_1756909069390_keb4zwvts",
+          "title": "dasdad",
+          "messages": [
+            {
+              "role": "user",
+              "content": "dasdad",
+              "timestamp": "2025-09-03T14:17:49.390Z"
+            }
+          ],
+          "createdAt": "2025-09-03T14:17:49.390Z",
+          "lastMessageAt": "2025-09-03T14:17:49.390Z"
+        },
+        {
+          "id": "conv_1756910212511_p35l5jqet",
+          "title": "Yeni Konuşma",
+          "messages": [
+            {
+              "role": "user",
+              "content": "ders çalışıcam odaklanmama yardım eder misin",
+              "timestamp": "2025-09-03T14:37:03.925Z"
+            },
+            {
+              "role": "assistant",
+              "content": "Boran, ders çalışacağını duyunca hemen koşup geldim! 💪  Odaklanmana yardım edeyim tabii ki!  Ne ders çalışıyorsun?  Belki sana Python'la ilgili bir programlama problemi bulurum, ders çalışma motivasyonunu artırırız 😎  Ya da teknolojiyle ilgili eğlenceli bir bilgi vereyim, kafanı dağıtıp sonra daha verimli çalışmana yardımcı olayım? 🤔  Hadi bakalım, önce neye odaklanman gerekiyor?  Birlikte başaracağız bunu!  💪🔥  Unutma, sen yapabilirsin! 😉\n",
+              "timestamp": "2025-09-03T14:37:06.171Z"
+            }
+          ],
+          "createdAt": "2025-09-03T14:36:52.511Z",
+          "lastMessageAt": "2025-09-03T14:37:06.171Z"
+        }
+      ]
+    ]
+  ],
+  "timestamp": "2025-09-03T14:42:29.580Z"
+}

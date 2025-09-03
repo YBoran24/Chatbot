@@ -1,0 +1,205 @@
+{
+  "userMemories": [
+    [
+      "user_1756736196740_8mvszv0ee",
+      {
+        "research": [],
+        "preferences": {},
+        "interests": [],
+        "personalHistory": [],
+        "savedConversations": []
+      }
+    ],
+    [
+      "user_1756736434937_yl5i8vs2g",
+      {
+        "research": [],
+        "preferences": {},
+        "interests": [
+          "python"
+        ],
+        "personalHistory": [],
+        "savedConversations": []
+      }
+    ],
+    [
+      "user_1756910258193_t0qgigcfv",
+      {
+        "research": [],
+        "preferences": {},
+        "interests": [],
+        "personalHistory": [],
+        "savedConversations": []
+      }
+    ]
+  ],
+  "userInteractions": [
+    [
+      "user_1756736196740_8mvszv0ee",
+      {
+        "totalMessages": 0,
+        "favoriteTopics": [],
+        "commonQuestions": [],
+        "preferredResponseStyle": "balanced",
+        "conversationPatterns": []
+      }
+    ],
+    [
+      "user_1756736434937_yl5i8vs2g",
+      {
+        "totalMessages": 18,
+        "favoriteTopics": [
+          {
+            "topic": "teknoloji",
+            "count": 1
+          },
+          {
+            "topic": "eğitim",
+            "count": 1
+          }
+        ],
+        "commonQuestions": [],
+        "preferredResponseStyle": "balanced",
+        "conversationPatterns": [
+          {
+            "timestamp": "2025-09-03T11:43:19.719Z",
+            "message": "edasdadasdaıdjkalsmdasdıadjamdıadjadmsdopakdüsoadkadsoakdaosdakdsareal time chat app how scheduled m",
+            "messageLength": 765,
+            "isQuestion": false,
+            "hasEmoji": false
+          },
+          {
+            "timestamp": "2025-09-03T11:48:16.727Z",
+            "message": "dertleşelim",
+            "messageLength": 11,
+            "isQuestion": false,
+            "hasEmoji": false
+          },
+          {
+            "timestamp": "2025-09-03T11:48:30.814Z",
+            "message": "/lang tr",
+            "messageLength": 8,
+            "isQuestion": false,
+            "hasEmoji": false
+          },
+          {
+            "timestamp": "2025-09-03T11:48:31.884Z",
+            "message": "/lang en",
+            "messageLength": 8,
+            "isQuestion": false,
+            "hasEmoji": false
+          },
+          {
+            "timestamp": "2025-09-03T11:48:32.016Z",
+            "message": "/lang tr",
+            "messageLength": 8,
+            "isQuestion": false,
+            "hasEmoji": false
+          },
+          {
+            "timestamp": "2025-09-03T11:48:32.383Z",
+            "message": "/lang en",
+            "messageLength": 8,
+            "isQuestion": false,
+            "hasEmoji": false
+          },
+          {
+            "timestamp": "2025-09-03T11:48:38.662Z",
+            "message": "selam",
+            "messageLength": 5,
+            "isQuestion": false,
+            "hasEmoji": false
+          },
+          {
+            "timestamp": "2025-09-03T13:42:57.669Z",
+            "message": "/help",
+            "messageLength": 5,
+            "isQuestion": false,
+            "hasEmoji": false
+          },
+          {
+            "timestamp": "2025-09-03T13:43:11.093Z",
+            "message": "/about",
+            "messageLength": 6,
+            "isQuestion": false,
+            "hasEmoji": false
+          },
+          {
+            "timestamp": "2025-09-03T13:43:31.312Z",
+            "message": "/formal",
+            "messageLength": 7,
+            "isQuestion": false,
+            "hasEmoji": false
+          },
+          {
+            "timestamp": "2025-09-03T13:43:42.740Z",
+            "message": "selam",
+            "messageLength": 5,
+            "isQuestion": false,
+            "hasEmoji": false
+          },
+          {
+            "timestamp": "2025-09-03T13:44:24.224Z",
+            "message": "/addinterest python",
+            "messageLength": 19,
+            "isQuestion": false,
+            "hasEmoji": false
+          },
+          {
+            "timestamp": "2025-09-03T14:16:41.984Z",
+            "message": "adkmsdad",
+            "messageLength": 8,
+            "isQuestion": false,
+            "hasEmoji": false
+          },
+          {
+            "timestamp": "2025-09-03T14:17:06.729Z",
+            "message": "boran",
+            "messageLength": 5,
+            "isQuestion": false,
+            "hasEmoji": false
+          },
+          {
+            "timestamp": "2025-09-03T14:17:49.390Z",
+            "message": "dasdad",
+            "messageLength": 6,
+            "isQuestion": false,
+            "hasEmoji": false
+          },
+          {
+            "timestamp": "2025-09-03T14:18:45.149Z",
+            "message": "selam",
+            "messageLength": 5,
+            "isQuestion": false,
+            "hasEmoji": false
+          },
+          {
+            "timestamp": "2025-09-03T14:19:27.589Z",
+            "message": "python diliyle ilgili bilgi almak istiyorum",
+            "messageLength": 43,
+            "isQuestion": false,
+            "hasEmoji": false
+          },
+          {
+            "timestamp": "2025-09-03T14:37:03.923Z",
+            "message": "ders çalışıcam odaklanmama yardım eder misin",
+            "messageLength": 44,
+            "isQuestion": false,
+            "hasEmoji": false
+          }
+        ]
+      }
+    ],
+    [
+      "user_1756910258193_t0qgigcfv",
+      {
+        "totalMessages": 0,
+        "favoriteTopics": [],
+        "commonQuestions": [],
+        "preferredResponseStyle": "balanced",
+        "conversationPatterns": []
+      }
+    ]
+  ],
+  "timestamp": "2025-09-03T14:42:29.580Z"
+}
