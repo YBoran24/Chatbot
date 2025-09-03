@@ -128,10 +128,6 @@ node index.js
 5. Dalınızı push edin (`git push origin feature/YeniOzellik`)
 6. Bir Pull Request oluşturun
 
-## Lisans
-
-Bu proje MIT Lisansı ile lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
-
 ## İletişim
 
 Proje ile ilgili sorularınız için lütfen issue oluşturun veya e-posta gönderin.
