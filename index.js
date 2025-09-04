@@ -1794,7 +1794,12 @@ app.post("/upload", upload.single('file'), async (req, res) => {
   }
 });
 
-// Sunucuyu başlat
-app.listen(3000, () => {
-  console.log("Chatbot 3000 portunda çalışıyor 🚀 http://localhost:3000");
-});
+// Sunucuyu başlat - sadece doğrudan çalıştırıldığında
+if (require.main === module) {
+  app.listen(3000, () => {
+    console.log("Chatbot 3000 portunda çalışıyor 🚀 http://localhost:3000");
+  });
+}
+
+// Vercel için uygulamayı dışa aktar
+module.exports = app;
