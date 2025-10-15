@@ -18,8 +18,9 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Google Gemini client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-const visionModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+const model = genAI.getGenerativeModel({ model: "models/gemini-2.5-flash" });
+const visionModel = genAI.getGenerativeModel({ model: "models/gemini-2.5-flash" });
 
 // Multer configuration for file uploads
 const storage = multer.diskStorage({
